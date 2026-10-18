@@ -147,6 +147,13 @@ PY
       echo "WARNING: --real requested but Pearl Connect signer not ready — running paper-only cycle" >&2
     fi
   fi
+  # A prompt that opens straight on the "# Trading Cycle Procedure" heading
+  # reads to Sonnet 5 as system context, not a request: LIGHT ticks replied
+  # "what would you like help with?" and did nothing (2026-10-18). A plain
+  # lead-in line makes it an instruction; Opus followed either form.
+  PROMPT="Run one trading cycle by following the procedure below.
+
+$PROMPT"
 
   # No "Bash(git push:*)": on this machine loop.sh owns the push (see the
   # push block below). The ref plumbing is allowlisted because CYCLE.md
