@@ -4303,3 +4303,21 @@ There are no new hourly proposals since DEEP-10-10.
   markets (~3.4 screens per market per day). If core/screen.py re-screens unchanged markets, a
   re-screen-on-mid-move rule would free quota for the new commodities query.
 - There were no new hourly proposals in this window.
+
+## 2026-10-18 01:0xZ - operator machine: Polymarket gamma API returns HTTP 451 (OPERATOR, HIGH)
+
+- **Symptom:** on the 2026-10-18 01:03Z tick (operator machine, lease taken by loop.sh),
+  `core/resolve.py` got `HTTP Error 451: Unavailable For Legal Reasons` from
+  `gamma-api.polymarket.com/markets/<id>` on every market it tried (99 of 99, e.g. 1193094,
+  5194672, 5155512, 2420478, the whole Parcl 51947xx set). Each fetch retries 3 times, so
+  the run was still going and was killed after 10 minutes. It settled nothing and wrote nothing.
+- **Effect:** settlement, scan, quotes and the open-position monitor all read from gamma, so
+  no tick from this machine can do anything useful while the block holds. Earlier
+  operator-machine ticks (e.g. 2026-09-28, 2026-10-06) read gamma fine, so something changed
+  in this machine's network path (VPN off, or a new egress IP in a geo-blocked region).
+- **Ask:** (a) restore a gamma-reachable egress on this machine, or have loop.sh run a
+  one-request gamma preflight and skip the tick on 451 (that check is operator-owned).
+  (b) Consider making resolve.py stop after N consecutive 451s instead of retrying every
+  market 3 times: this run used a 10-minute budget to learn one fact.
+  Cloud ticks are unaffected as far as I know (the last cloud FULL, 2026-10-17 16:25Z, read
+  gamma normally).
